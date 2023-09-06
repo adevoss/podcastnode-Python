@@ -139,7 +139,17 @@ elif work['message'][0:7] != 'No Work':
   logging.info('Reporting results...')
   #Get Usage/Available
   df = shutil.disk_usage('/home/ipfs/.ipfs')
-  payload['used'] = df.used
+  repostat = subprocess.run('ipfs repo stat -s|grep RepoSize', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  logging.info('Repostat returncode: ' + str(repostat.returncode))
+
+  if repostat.returncode == 0:
+     repolen = repostat.stdout.decode().strip().split(':')
+     used = int(repolen[1].strip())
+     used = used / 100
+  else:
+     used = 0
+
+  payload['used'] = used
 
   # temporary hack
   payload['avail'] = df.total
